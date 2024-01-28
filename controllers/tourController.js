@@ -1,24 +1,24 @@
-const fs = require('fs');
+const fs = require("fs");
 
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 );
 
 exports.getAllTours = (req, res) => {
   res
     .status(200)
-    .json({ status: 'success', results: tours.length, data: { tours } });
+    .json({ status: "success", results: tours.length, data: { tours } });
 };
 
 exports.getTour = (req, res) => {
   const id = +req.params.id;
 
   if (id > tours.length - 1) {
-    return res.status(404).json({ status: 'fail', message: 'Invalid Id' });
+    return res.status(404).json({ status: "fail", message: "Invalid Id" });
   }
 
   const tour = tours.find((tour) => tour.id === id);
-  res.status(200).json({ status: 'success', data: { tour } });
+  res.status(200).json({ status: "success", data: { tour } });
 };
 
 exports.createTour = (req, res) => {
@@ -30,22 +30,22 @@ exports.createTour = (req, res) => {
     JSON.stringify(tours),
     (err) => {
       if (!err)
-        res.status(201).json({ status: 'success', data: { tour: newTour } });
+        res.status(201).json({ status: "success", data: { tour: newTour } });
       else
         res
           .status(500)
-          .json({ status: 'error', message: 'Error creating tour.' });
-    }
+          .json({ status: "error", message: "Error creating tour." });
+    },
   );
 };
 
 exports.updateTour = (req, res) => {
   res
     .status(500)
-    .json({ status: 'error', message: 'This route is not yet implemented.' });
+    .json({ status: "error", message: "This route is not yet implemented." });
 };
 exports.deleteTour = (req, res) => {
   res
     .status(500)
-    .json({ status: 'error', message: 'This route is not yet implemented.' });
+    .json({ status: "error", message: "This route is not yet implemented." });
 };
