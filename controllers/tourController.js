@@ -27,7 +27,16 @@ exports.getAllTours = async (req, res) => {
       query = query.sort("-createAt");
     }
 
-    // 3) Execute the query
+    // 3)Field Limiting
+    if (req.query.fields) {
+      let fieldsStr = JSON.stringify(req.query.fields); // process of selecting fields called projection
+      fieldsStr = fieldsStr.split(",").join(" ");
+      query = query.select(JSON.parse(fieldsStr));
+    } else {
+      query = query.select("-__v"); // - __V excludes a certain field from the response being sent to the user.
+    }
+
+    // 4) Execute the query
     const tours = await query; // await keyword is used to execute the query
 
     res.status(200).json({
