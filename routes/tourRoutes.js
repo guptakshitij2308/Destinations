@@ -7,6 +7,7 @@ const {
   getTour,
   updateTour,
   deleteTour,
+  aliasTopTours,
 } = require("../controllers/tourController");
 
 router.param("id", (req, res, next, val) => {
@@ -14,6 +15,8 @@ router.param("id", (req, res, next, val) => {
   // console.log(val);
   next();
 });
+
+router.route("/top-5-cheap").get(aliasTopTours, getAllTours); // use case of middleware to reuse the controller logic to define custom routes.
 
 router.route("/").get(getAllTours).post(createTour);
 
