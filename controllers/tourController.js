@@ -1,6 +1,14 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const Tour = require("../models/tourModel");
 
+// prefilling the query string for the user so that the user does not have to fill it.
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingsAverage,price";
+  req.query.fields = "name,price,ratingAverage,summary,difficulty";
+  next();
+};
+
 exports.getAllTours = async (req, res) => {
   try {
     // 1A) Filtering
@@ -47,7 +55,7 @@ exports.getAllTours = async (req, res) => {
 
     if (req.query.page) {
       const numTours = await Tour.countDocuments();
-      if (skip > numTours) {
+      if (skip >= numTours) {
         throw new Error("This page does not exists.");
       }
     }
