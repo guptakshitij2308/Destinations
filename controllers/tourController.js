@@ -1,5 +1,6 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const Tour = require("../models/tourModel");
+const APIFeatures = require("../utils/apiFeatures");
 
 // prefilling the query string for the user so that the user does not have to fill it.
 exports.aliasTopTours = (req, res, next) => {
@@ -11,57 +12,14 @@ exports.aliasTopTours = (req, res, next) => {
 
 exports.getAllTours = async (req, res) => {
   try {
-    // 1A) Filtering
-    const queryObj = { ...req.query }; // doing this we create a shallow copy ( req.query will yield a hard copy )
-    const excludedFields = ["page", "sort", "limit", "limit", "fields"];
-    excludedFields.forEach((el) => delete queryObj[el]);
-
-    // 1B) Advanced Filtering for lte,gte ,etc.
-
-    let queryString = JSON.stringify(queryObj);
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      (match) => `$${match}`,
-    );
-
-    let query = Tour.find(JSON.parse(queryString));
-
-    // 2) Sorting
-
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(",").join(" "); // in case there is a tie on sorting then sorted by second field name
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort("-createAt");
-    }
-
-    // 3)Field Limiting
-    if (req.query.fields) {
-      let fieldsStr = JSON.stringify(req.query.fields); // process of selecting fields called projection
-      fieldsStr = fieldsStr.split(",").join(" ");
-      query = query.select(JSON.parse(fieldsStr));
-    } else {
-      query = query.select("-__v"); // - __V excludes a certain field from the response being sent to the user.
-    }
-
-    // 4) Pagination
-
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 10;
-
-    const skip = (page - 1) * limit;
-
-    query = query.skip(skip).limit(limit);
-
-    if (req.query.page) {
-      const numTours = await Tour.countDocuments();
-      if (skip >= numTours) {
-        throw new Error("This page does not exists.");
-      }
-    }
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .paginate()
+      .fieldLimiting();
 
     // Execute the query
-    const tours = await query; // await keyword is used to execute the query
+    const tours = await features.query; // await keyword is used to execute the query
 
     res.status(200).json({
       status: "success",
