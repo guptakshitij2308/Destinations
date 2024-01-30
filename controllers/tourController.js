@@ -3,16 +3,31 @@ const Tour = require("../models/tourModel");
 
 exports.getAllTours = async (req, res) => {
   try {
-    // console.log(req.query);
-    // we need to create a shallow copy of this query obj and remove pagination and sorting if present from this query
+    // 1A) Filtering
     const queryObj = { ...req.query }; // doing this we create a shallow copy ( req.query will yield a hard copy )
     const excludedFields = ["page", "sort", "limit", "limit", "fields"];
     excludedFields.forEach((el) => delete queryObj[el]);
-    // console.log(req.query, queryObj);
-    // const tours = await Tour.find(req.query);
-    // const tours = await Tour.find(queryObj);
-    const query = Tour.find(queryObj);
 
+    // 1B) Advanced Filtering for lte,gte ,etc.
+
+    let queryString = JSON.stringify(queryObj);
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (match) => `$${match}`,
+    );
+
+    let query = Tour.find(JSON.parse(queryString));
+
+    // 2) Sorting
+
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" "); // in case there is a tie on sorting then sorted by second field name
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createAt");
+    }
+
+    // 3) Execute the query
     const tours = await query; // await keyword is used to execute the query
 
     res.status(200).json({
