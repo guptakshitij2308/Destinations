@@ -1,8 +1,19 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 const Tour = require("../models/tourModel");
 
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    // console.log(req.query);
+    // we need to create a shallow copy of this query obj and remove pagination and sorting if present from this query
+    const queryObj = { ...req.query }; // doing this we create a shallow copy ( req.query will yield a hard copy )
+    const excludedFields = ["page", "sort", "limit", "limit", "fields"];
+    excludedFields.forEach((el) => delete queryObj[el]);
+    // console.log(req.query, queryObj);
+    // const tours = await Tour.find(req.query);
+    // const tours = await Tour.find(queryObj);
+    const query = Tour.find(queryObj);
+
+    const tours = await query; // await keyword is used to execute the query
 
     res.status(200).json({
       status: "success",
