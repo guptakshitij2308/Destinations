@@ -7,7 +7,8 @@
     "start": "SET NODE_ENV=development && nodemon server.js",
     "start:prod": "SET NODE_ENV=production && nodemon server.js",
     "start:delete": "node dev-data/data/import-dev-data.js --delete",
-    "start:upload": "node dev-data/data/import-dev-data.js --import"
+    "start:upload": "node dev-data/data/import-dev-data.js --import",
+    "debug": "ndb server.js"
   },
   "author": "Kshitij",
   "license": "ISC",
