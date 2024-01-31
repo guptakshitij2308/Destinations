@@ -89,3 +89,35 @@ exports.deleteTour = async (req, res) => {
     res.status(404).json({ status: "fail", message: err.message });
   }
 };
+
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          // _id: null,
+          _id: { $toUpper: "$difficulty" },
+          numTours: { $sum: 1 },
+          numRatings: { $sum: "$ratingsQuantity" },
+          avgRating: { $avg: "$ratingsAverage" },
+          avgPrice: { $avg: "$price" },
+          minPrice: { $min: "$price" },
+          maxPrice: { $max: "$price" },
+        },
+      }, // allows to group documents together (accumulators)
+      {
+        $sort: { avgPrice: 1 },
+      },
+      // {
+      //   $match: { _id: { $ne: "EASY" } },
+      // },
+    ]); // mongodb aggregation pipeline accepts an array of objects which are the different stages of the pipeline.
+
+    res.status(200).json({ status: "success", data: { stats } });
+  } catch (err) {
+    res.status(404).json({ status: "fail", message: err.message });
+  }
+};
