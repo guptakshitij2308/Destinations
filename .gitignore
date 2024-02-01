@@ -131,3 +131,7 @@ dist
 
 #Environments
 .env
+.env.example
+.env.local
+.env.staging
+config.env
