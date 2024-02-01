@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter your password."],
     minLength: 8,
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -35,13 +36,23 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// JWT is stateless solution for authentication of user ( users do not have any state on the server. )
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
-  this.passwordConfirm = null;
+  this.passwordConfirm = undefined;
   next();
 });
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword,
+) {
+  const result = await bcrypt.compare(candidatePassword, userPassword);
+  return result;
+};
 
 const User = mongoose.model("User", userSchema);
 
