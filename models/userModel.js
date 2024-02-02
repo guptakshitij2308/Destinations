@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema({
       message: "Password and confirm password do not match.",
     },
   },
+  passwordChangedAt: Date,
 });
 
 // JWT is stateless solution for authentication of user ( users do not have any state on the server. )
@@ -52,6 +53,17 @@ userSchema.methods.correctPassword = async function (
 ) {
   const result = await bcrypt.compare(candidatePassword, userPassword);
   return result;
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    return JWTTimestamp < changedTimestamp;
+  }
+  return false;
 };
 
 const User = mongoose.model("User", userSchema);
