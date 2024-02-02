@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -40,6 +41,8 @@ const userSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 // JWT is stateless solution for authentication of user ( users do not have any state on the server. )
@@ -69,6 +72,18 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
     return JWTTimestamp < changedTimestamp;
   }
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  return token;
 };
 
 const User = mongoose.model("User", userSchema);
