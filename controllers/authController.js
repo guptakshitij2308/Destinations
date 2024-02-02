@@ -14,6 +14,12 @@ const generateToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+const createSendToken = (user, statusCode, res) => {
+  const token = generateToken(user._id);
+
+  res.status(statusCode).json({ status: "success", token, data: { user } });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -24,9 +30,11 @@ exports.signup = catchAsync(async (req, res, next) => {
     // passwordChangedAt: req.body.passwordChangedAt,
   });
 
-  const token = generateToken(newUser._id);
+  // const token = generateToken(newUser._id);
 
-  res.status(201).json({ status: "success", token, data: { newUser } });
+  // res.status(201).json({ status: "success", token, data: { newUser } });
+
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -43,9 +51,11 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("Incorrect email or password.", 401));
   }
-  const token = generateToken(user._id);
 
-  res.status(200).json({ status: "success", token });
+  createSendToken(user, 200, res);
+  // const token = generateToken(user._id);
+
+  // res.status(200).json({ status: "success", token });
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -156,6 +166,33 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetToken = undefined;
   await user.save();
 
-  const token = generateToken(user._id);
-  res.status(200).json({ status: "success", token });
+  // const token = generateToken(user._id);
+  // res.status(200).json({ status: "success", token });
+  createSendToken(user, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // console.log(req.user);
+  const user = await User.findOne({ email: req.user.email }).select(
+    "+password",
+  );
+
+  const { currentPassword, password, passwordConfirm } = req.body;
+
+  const matched = await user.correctPassword(currentPassword, user.password);
+
+  if (!matched) {
+    return next(
+      new AppError("Wrong password.Please try with correct password.", 401),
+    );
+  }
+
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  await user.save({ validateBeforeSave: true });
+
+  // const token = generateToken(user._id);
+
+  // res.status(200).json({ status: "success", token });
+  createSendToken(user, 200, res);
 });
