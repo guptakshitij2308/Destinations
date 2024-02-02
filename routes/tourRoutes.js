@@ -27,6 +27,14 @@ router.route("/top-5-cheap").get(aliasTopTours, getAllTours); // use case of mid
 router.route("/").get(authController.protect, getAllTours).post(createTour);
 
 // For optional parameter add a question mark at the end like :id?
-router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
+router
+  .route("/:id")
+  .get(getTour)
+  .patch(updateTour)
+  .delete(
+    authController.protect,
+    authController.restrictTo("admin", "lead-guide"),
+    deleteTour,
+  );
 
 module.exports = router;
