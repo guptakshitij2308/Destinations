@@ -63,6 +63,14 @@ userSchema.methods.correctPassword = async function (
   return result;
 };
 
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+
+  // Saving to the db is a bit slower than issuing jwt ; hence we subtract 1s from here
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
