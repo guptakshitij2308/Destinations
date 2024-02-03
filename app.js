@@ -1,5 +1,8 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const express = require("express");
 const morgan = require("morgan");
+// const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
 const AppError = require("./utils/appError");
 const tourRouter = require("./routes/tourRoutes");
@@ -8,7 +11,7 @@ const globalErrorHandler = require("./controllers/errorController");
 
 const app = express();
 
-//  Middlewares
+//  Global Middlewares
 
 // console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV.trim() === "development") {
@@ -16,6 +19,21 @@ if (process.env.NODE_ENV.trim() === "development") {
   //   console.log('hello');
   app.use(morgan("dev")); // middleware for logging data to console in development
 }
+
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: "Too many requests from this IP. Please try again later.",
+});
+
+app.use("/api", limiter);
+
+// const corsOptions = {
+//   origin: "http://localhost:3000",
+//   credentials: true, // Enable credentials (cookies)
+// };
+
+// app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`)); // middleware for serving static files
 
