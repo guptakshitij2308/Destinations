@@ -121,6 +121,13 @@ tourSchema.virtual("durationWeeks").get(function () {
 });
 // virtual properties can not be used to query as they are not a part of the database.
 
+// Virtual populate ( the populate is not being persisted to the database. We are establishing it in the frontend.)
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
+});
+
 // Document middleware provided by mongoose runs before .save() and .create() ; It does not run before .insert()
 tourSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
