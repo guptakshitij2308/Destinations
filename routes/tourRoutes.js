@@ -12,12 +12,15 @@ const {
   getMonthlyPlan,
 } = require("../controllers/tourController");
 const authController = require("../controllers/authController");
+const reviewRouter = require("./reviewRoutes");
 
 router.param("id", (req, res, next, val) => {
   // param middleware only runs when it finds a specific parameter in the reuqest url.
   // console.log(val);
   next();
 });
+
+router.use("/:tourId/reviews", reviewRouter); // merge params ; mounting a router itself similar to app.use
 
 router.route("/tour-stats").get(getTourStats);
 router.route("/monthly-plan/:year").get(getMonthlyPlan);
@@ -36,5 +39,13 @@ router
     authController.restrictTo("admin", "lead-guide"),
     deleteTour,
   );
+
+// router
+//   .route("/:tourId/reviews")
+//   .post(
+//     authController.protect,
+//     authController.restrictTo("user"),
+//     createReview,
+//   );
 
 module.exports = router;
