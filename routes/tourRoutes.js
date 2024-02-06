@@ -23,17 +23,27 @@ router.param("id", (req, res, next, val) => {
 router.use("/:tourId/reviews", reviewRouter); // merge params ; mounting a router itself similar to app.use
 
 router.route("/tour-stats").get(getTourStats);
-router.route("/monthly-plan/:year").get(getMonthlyPlan);
+router
+  .route("/monthly-plan/:year")
+  .get(
+    authController.protect,
+    authController.restrictTo("admin", "lead-guide", "guide"),
+    getMonthlyPlan,
+  );
 
 router.route("/top-5-cheap").get(aliasTopTours, getAllTours); // use case of middleware to reuse the controller logic to define custom routes.
 
-router.route("/").get(authController.protect, getAllTours).post(createTour);
+router.route("/").get(getAllTours).post(createTour);
 
 // For optional parameter add a question mark at the end like :id?
 router
   .route("/:id")
   .get(getTour)
-  .patch(updateTour)
+  .patch(
+    authController.protect,
+    authController.restrictTo("admin", "lead-guide"),
+    updateTour,
+  )
   .delete(
     authController.protect,
     authController.restrictTo("admin", "lead-guide"),
