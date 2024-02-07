@@ -64,7 +64,8 @@ exports.getAll = (Model) =>
       .fieldLimiting();
 
     // Execute the query
-    const doc = await features.query; // await keyword is used to execute the query
+    // const doc = await features.query.explain(); // await keyword is used to execute the query
+    const doc = await features.query;
 
     res.status(200).json({
       status: "success",
