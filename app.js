@@ -85,3 +85,5 @@ app.all("*", (req, res, next) => {
 app.use(globalErrorHandler);
 
 module.exports = app;
+
+// When deploying deploy postman collection as well for the documentation.
