@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 // const cors = require("cors");
@@ -16,7 +17,13 @@ const globalErrorHandler = require("./controllers/errorController");
 
 const app = express();
 
+app.set("view engine", "pug"); // we have to tell express at the start after intializing our app about the template engine which will be used ; pug templates called views in express
+
+app.set("views", path.join(__dirname, "views")); // we are using path.join as we don't know if there would be / when we use __dirname  or not.
+
 //  Global Middlewares
+
+app.use(express.static(path.join(__dirname, "public"))); // middleware for serving static files
 
 app.use(helmet()); // used for setting security http headers to the response and request
 
@@ -44,7 +51,6 @@ app.use("/api", limiter);
 
 // Body parser,reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
-app.use(express.static(`${__dirname}/public`)); // middleware for serving static files
 
 // Data sanitization against NoSQL query injection
 // "email" : {"$gt" : ""},
@@ -69,6 +75,27 @@ app.use(
     ],
   }),
 );
+
+// Routes
+
+app.get("/", (req, res) => {
+  res.status(200).render("base", {
+    tour: "The Forest Hiker",
+    user: "Kshitij",
+  }); // we pass the data specified in object and this object is accessible in the template (locals)
+});
+
+app.get("/overview", (req, res) => {
+  res.status(200).render("overview", {
+    title: "All Tours",
+  });
+});
+
+app.get("/tour", (req, res) => {
+  res.status(200).render("tour", {
+    title: "The Forest Hiker Tour",
+  });
+});
 
 // We use version with api so as in future versions if updates are done the existing version is not broken.
 app.use("/api/v1/tours", tourRouter);

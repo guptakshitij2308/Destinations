@@ -1,0 +1,9 @@
+//- In these templates we ll only put the content specific to a page and then we will inject
+//- this content into the base template/parent template. (also called extending) ; opposite of including
+//- this is extends as here the child includes the base. All things except the block content will be copied into this file
+
+extends base
+
+//- basically redefining the block which is in base.
+block content
+  h1 This is the tour overview

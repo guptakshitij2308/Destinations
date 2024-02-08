@@ -1,0 +1,30 @@
+//- Pug is a simple whitespace sensitive syntax for writing HTML ( name and identation only required in the code )
+//- Each asset triggers its own http request. ( Hence things like favicon are automatically loaded.)
+doctype html
+html(lang="en")
+  head 
+    //- This way of using #tour is same as the template strings in ES6 and known as interpolation
+    //- title Destinations | #{tour}
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(href="https://fonts.googleapis.com/css?family=Lato:300,300i,700" rel="stylesheet")
+    link(rel="stylesheet" href="css/style.css")
+    link(rel="shortcut icon" type="image/png" href="img/favicon.png")
+    //- title Destinations | Exciting destinations for enthusiastic people
+    title Destinations | #{title}
+  body
+    //- h1= tour Buffered code (can include js as well) and adds to the output.
+    //- h1= tour 
+    //- h1= user.toUpperCase()
+    //- //- Unbuffered code below (doesn't add anything to the output.)
+    //- - const x =9;
+    //- h2= 2*x
+    //- p This is random textt
+    include _header
+
+
+    block content
+      h1 This is a placeholder heading
+
+
+    include _footer
