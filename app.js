@@ -13,6 +13,7 @@ const AppError = require("./utils/appError");
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
+const viewRouter = require("./routes/viewRoutes");
 const globalErrorHandler = require("./controllers/errorController");
 
 const app = express();
@@ -78,24 +79,7 @@ app.use(
 
 // Routes
 
-app.get("/", (req, res) => {
-  res.status(200).render("base", {
-    tour: "The Forest Hiker",
-    user: "Kshitij",
-  }); // we pass the data specified in object and this object is accessible in the template (locals)
-});
-
-app.get("/overview", (req, res) => {
-  res.status(200).render("overview", {
-    title: "All Tours",
-  });
-});
-
-app.get("/tour", (req, res) => {
-  res.status(200).render("tour", {
-    title: "The Forest Hiker Tour",
-  });
-});
+app.use("/", viewRouter); // mounting the view router in our app.
 
 // We use version with api so as in future versions if updates are done the existing version is not broken.
 app.use("/api/v1/tours", tourRouter);
