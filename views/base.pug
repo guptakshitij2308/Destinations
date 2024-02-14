@@ -5,13 +5,14 @@ html(lang="en")
   head 
     //- This way of using #tour is same as the template strings in ES6 and known as interpolation
     //- title Destinations | #{tour}
-    meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    link(href="https://fonts.googleapis.com/css?family=Lato:300,300i,700" rel="stylesheet")
-    link(rel="stylesheet" href="css/style.css")
-    link(rel="shortcut icon" type="image/png" href="img/favicon.png")
-    //- title Destinations | Exciting destinations for enthusiastic people
-    title Destinations | #{title}
+    block head
+      meta(charset="UTF-8")
+      meta(name="viewport", content="width=device-width, initial-scale=1.0")
+      link(href="https://fonts.googleapis.com/css?family=Lato:300,300i,700" rel="stylesheet")
+      link(rel="stylesheet" href="/css/style.css")
+      link(rel="shortcut icon" type="image/png" href="/img/favicon.png")
+      //- title Destinations | Exciting destinations for enthusiastic people
+      title Destinations | #{title}
   body
     //- h1= tour Buffered code (can include js as well) and adds to the output.
     //- h1= tour 
@@ -28,3 +29,4 @@ html(lang="en")
 
 
     include _footer
+    script(src='/js/mapbox.js')

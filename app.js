@@ -89,7 +89,6 @@ app.use("/api/v1/reviews", reviewRouter);
 
 app.all("*", (req, res, next) => {
   const err = new AppError(`Can't find ${req.url} on the server.`, 404);
-
   next(err); // is next receives an arguement express automatically knows that there has been an error.
 });
 
