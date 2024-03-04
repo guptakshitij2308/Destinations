@@ -11,6 +11,7 @@ html(lang="en")
       link(href="https://fonts.googleapis.com/css?family=Lato:300,300i,700" rel="stylesheet")
       link(rel="stylesheet" href="/css/style.css")
       link(rel="shortcut icon" type="image/png" href="/img/favicon.png")
+      script(defer, src="https://unpkg.com/axios@1.1.2/dist/axios.min.js")
       //- title Destinations | Exciting destinations for enthusiastic people
       title Destinations | #{title}
   body
@@ -29,4 +30,4 @@ html(lang="en")
 
 
     include _footer
-    script(src='/js/mapbox.js')
+    script(src='/js/bundle.js')

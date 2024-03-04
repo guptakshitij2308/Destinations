@@ -2,12 +2,13 @@
 const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
-// const cors = require("cors");
+const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser"); // this will parse all the cookies from the incoming request
 
 const AppError = require("./utils/appError");
 const tourRouter = require("./routes/tourRoutes");
@@ -26,7 +27,7 @@ app.set("views", path.join(__dirname, "views")); // we are using path.join as we
 
 app.use(express.static(path.join(__dirname, "public"))); // middleware for serving static files
 
-app.use(helmet()); // used for setting security http headers to the response and request
+app.use(helmet({ contentSecurityPolicy: false })); // used for setting security http headers to the response and request
 
 // console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV.trim() === "development") {
@@ -50,8 +51,12 @@ app.use("/api", limiter);
 
 // app.use(cors(corsOptions));
 
+app.use(cors());
+app.options("*", cors());
+
 // Body parser,reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
+app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
 // "email" : {"$gt" : ""},

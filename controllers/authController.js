@@ -71,6 +71,7 @@ exports.login = catchAsync(async (req, res, next) => {
   // res.status(200).json({ status: "success", token });
 });
 
+// It is used to determine if a user is logged in or not ; But it only works for protected routes not all routes
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
   if (
@@ -78,6 +79,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -106,6 +109,29 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   req.user = freshUser;
+  next();
+});
+
+// Only there for rendered pages. Hence there will be never an error in this middleware
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    );
+
+    const freshUser = await User.findById(decoded.id);
+
+    if (!freshUser) return next();
+
+    if (freshUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+
+    res.locals.user = freshUser; // every pug template will have access to res.locals ; similar to passing data to a template using the render function
+    req.user = freshUser;
+    return next();
+  }
   next();
 });
 
