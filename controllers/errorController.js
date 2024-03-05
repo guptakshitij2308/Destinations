@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const AppError = require("../utils/appError");
 
@@ -27,28 +28,87 @@ const handleJWTError = (err) =>
 const handleJWTExpiredError = (err) =>
   new AppError(`Your token has expired. Please login again!`, 401);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
+const sendErrorDev = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith("/api")) {
+    // if the request is from the api
+    return res.status(err.statusCode).json({
+      status: err.status,
+      error: err,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
+  // B) RENDERED WEBSITE
+  console.error("Error", err);
+  return res.status(err.statusCode).render("error", {
+    title: "Something went very wrong!",
     message: err.message,
-    stack: err.stack,
   });
 };
 
-const sendErrorProd = (err, res) => {
-  // Operational, trusted error: send message to client
-  if (err.isOperational) {
-    res
-      .status(err.statusCode)
-      .json({ status: err.status, message: err.message });
+const sendErrorProd = (err, req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    // 1) Operational, trusted error: send message to client
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
+    // 2) Programing or other unkown error : don't leak error details
+    // A) Log error
+    console.error(err);
+    // B) Send generic message
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something went wrong!" });
   }
 
-  // Programing or other unkown error : don't leak error details
-  else {
-    console.error(err);
-    res.status(500).json({ status: "error", message: "Something went wrong!" });
+  // 2) Rendered Website
+
+  // 1) Operational, trusted error: send message to client
+  if (err.isOperational) {
+    console.log(err);
+    return res.status(err.statusCode).render("error", {
+      title: "Something went very wrong!",
+      msg: err.message,
+    });
   }
+  // 2) Programing or other unkown error : don't leak error details
+
+  console.error(err);
+  return res.status(err.statusCode).render("error", {
+    title: "Something went very wrong!",
+    msg: "Please try again later.",
+  });
+  // if (req.originalUrl.startsWith("/api")) {
+  //   if (err.operationalError) {
+  //     res.status(err.statusCode).json({
+  //       status: err.status,
+  //       message: err.message,
+  //     });
+  //   } else {
+  //     console.error("Error", err);
+  //     res.status(500).json({
+  //       status: "error",
+  //       message: "Something went wrong",
+  //     });
+  //   }
+  // } else {
+  //   if (err.operationalError) {
+  //     res.status(err.statusCode).render("error", {
+  //       title: "Something went wrong",
+  //       message: err.message,
+  //     });
+  //   } else {
+  //     console.error("Error", err);
+  //     res.status(500).render("error", {
+  //       title: "Something went wrong",
+  //       message: "Please try again later",
+  //     });
+  //   }
+  // }
 };
 
 module.exports = (err, req, res, next) => {
@@ -57,10 +117,9 @@ module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
 
   if (process.env.NODE_ENV.trim() === "development") {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV.trim() === "production") {
     let error = { ...err, name: err.name, message: err.message };
-
     if (error.name === "CastError") {
       error = handleCastErrorDB(error);
     }
@@ -77,6 +136,6 @@ module.exports = (err, req, res, next) => {
     if (error.name === "TokenExpiredError") {
       error = handleJWTExpiredError(error);
     }
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 };

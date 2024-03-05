@@ -71,6 +71,15 @@ exports.login = catchAsync(async (req, res, next) => {
   // res.status(200).json({ status: "success", token });
 });
 
+exports.logout = (req, res) => {
+  res.cookie("jwt", "loggedout", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({ status: "success" });
+};
+
 // It is used to determine if a user is logged in or not ; But it only works for protected routes not all routes
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
@@ -113,27 +122,31 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 // Only there for rendered pages. Hence there will be never an error in this middleware
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
-  if (req.cookies.jwt) {
-    const decoded = await promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET,
-    );
+exports.isLoggedIn = async (req, res, next) => {
+  try {
+    if (req.cookies.jwt) {
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET,
+      );
 
-    const freshUser = await User.findById(decoded.id);
+      const freshUser = await User.findById(decoded.id);
 
-    if (!freshUser) return next();
+      if (!freshUser) return next();
 
-    if (freshUser.changedPasswordAfter(decoded.iat)) {
+      if (freshUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      res.locals.user = freshUser; // every pug template will have access to res.locals ; similar to passing data to a template using the render function
+      req.user = freshUser;
       return next();
     }
-
-    res.locals.user = freshUser; // every pug template will have access to res.locals ; similar to passing data to a template using the render function
-    req.user = freshUser;
+  } catch (err) {
     return next();
   }
   next();
-});
+};
 
 exports.restrictTo =
   (...roles) =>
