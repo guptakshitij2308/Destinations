@@ -4,8 +4,10 @@ const {
   getTour,
   loginForm,
   signupForm,
+  getAccount,
+  updateUserData,
 } = require("../controllers/viewController");
-const { isLoggedIn } = require("../controllers/authController");
+const { isLoggedIn, protect } = require("../controllers/authController");
 
 const router = express.Router();
 
@@ -17,13 +19,15 @@ const router = express.Router();
 //   }); // we pass the data specified in object and this object is accessible in the template (locals)
 // });
 
-router.use(isLoggedIn);
+// router.use(isLoggedIn);
 
-router.get("/", getOverview);
+router.get("/", isLoggedIn, getOverview);
 
-router.get("/tour/:slug", getTour);
+router.get("/tour/:slug", isLoggedIn, getTour);
 
-router.get("/signup", signupForm);
-router.get("/login", loginForm);
+router.get("/signup", isLoggedIn, signupForm);
+router.get("/login", isLoggedIn, loginForm);
+router.get("/me", protect, getAccount);
+router.post("/update-user-data", protect, updateUserData);
 
 module.exports = router;

@@ -57,6 +57,7 @@ app.options("*", cors());
 // Body parser,reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 // Data sanitization against NoSQL query injection
 // "email" : {"$gt" : ""},
