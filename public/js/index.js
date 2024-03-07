@@ -1,9 +1,12 @@
 /* eslint-disable */
 import "@babel/polyfill";
 import { login, logout } from "./login";
+import { updateData } from "./updateSettings";
 
 const loginForm = document.querySelector(".form--login");
 const logoutBtn = document.querySelector(".nav__el--logout");
+const updateBtn = document.querySelector(".form-user-data");
+const updatePasswordBtn = document.querySelector(".form-user-password");
 
 if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
@@ -12,6 +15,42 @@ if (loginForm) {
     const password = document.getElementById("password").value;
     login(email, password);
     console.log("I was submitted bro!!");
+  });
+}
+
+if (updateBtn) {
+  updateBtn.addEventListener("submit", (e) => {
+    // console.log("Submitted.");
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    const name = document.getElementById("name").value;
+    updateData({ name, email }, "data");
+    // console.log("Updated bro!!");
+  });
+}
+
+if (updatePasswordBtn) {
+  updatePasswordBtn.addEventListener("submit", async (e) => {
+    // console.log("Submitted.");
+    // document.querySelector(".btn--save-password").textContent = "Updating...";
+    e.preventDefault();
+    const password = document.getElementById("password-current").value;
+    const newPassword = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("password-confirm").value;
+    await updateData(
+      {
+        currentPassword: password,
+        password: newPassword,
+        passwordConfirm: confirmPassword,
+      },
+      "password",
+    );
+    // console.log("Updated bro!!");
+    // document.querySelector(".btn--save-password").textContent = "Save Password";
+    document.getElementById("password-current").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("password-confirm").value = "";
+    location.reload(true);
   });
 }
 

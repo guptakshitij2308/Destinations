@@ -3,13 +3,13 @@ const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
 
-const filterObj = (obj, ...allowedFields) => {
-  let newObj = {};
-  newObj = Object.keys(obj).forEach((el) => {
-    if (allowedFields.includes(el)) newObj[el] = obj[el];
-  });
-  return newObj;
-};
+const filterObj = (obj, ...allowedFields) =>
+  Object.keys(obj).reduce((newObj, key) => {
+    if (allowedFields.includes(key)) {
+      newObj[key] = obj[key];
+    }
+    return newObj;
+  }, {});
 
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
@@ -26,7 +26,10 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     );
   }
 
+  // console.log(req.body);
+
   const filteredBody = filterObj(req.body, "name", "email");
+  // console.log(filteredBody);
 
   const updateUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
