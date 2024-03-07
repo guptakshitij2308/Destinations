@@ -1,0 +1,51 @@
+//- In these templates we ll only put the content specific to a page and then we will inject
+//- this content into the base template/parent template. (also called extending) ; opposite of including
+//- this is extends as here the child includes the base. All things except the block content will be copied into this file
+
+extends base
+
+//- basically redefining the block which is in base.
+block content
+  main.main
+    .card-container
+      //- built in loops in pug ; this is the same as tours.forEach(tour => {
+      each tour in tours
+        .card
+          .card__header
+            .card__picture
+              .card__picture-overlay &nbsp;
+              img.card__picture-img(src=`img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+            h3.heading-tertirary
+              span= tour.name
+
+          .card__details
+            h4.card__sub-heading= `${tour.difficulty} ${tour.duration}-day tour`
+            p.card__text= tour.summary
+            .card__data
+              svg.card__icon
+                use(xlink:href='img/icons.svg#icon-map-pin')
+              span= tour.startLocation.description
+            .card__data
+              svg.card__icon
+                use(xlink:href='img/icons.svg#icon-calendar')
+              span= tour.startDates[0].toLocaleString('en-US', {year: 'numeric', month: 'long'})
+            .card__data
+              svg.card__icon
+                use(xlink:href='img/icons.svg#icon-flag')
+              span= `${tour.locations.length} stops` 
+            .card__data
+              svg.card__icon
+                use(xlink:href='img/icons.svg#icon-user')
+              span= `${tour.maxGroupSize} people`
+
+          .card__footer
+            p
+              //- | means empty pipe lane ; used to manually create space between two inlinc block elements.
+              span.card__footer-value= `$${tour.price}`
+              | 
+              span.card__footer-text per person
+            p.card__ratings
+              span.card__footer-value= `${tour.ratingsAverage}`
+              | 
+              span.card__footer-text= `rating (${tour.ratingsQuantity})`
+            a.btn.btn--green.btn--small(href=`/tour/${tour.slug}`) Details

@@ -39,6 +39,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, "Rating must be above 1.0"],
       max: [5, "Rating must be less than 5.0"],
+      set: (val) => Math.round(val * 10) / 10,
     },
     ratingsQuantity: {
       type: Number,
@@ -83,6 +84,31 @@ const tourSchema = new mongoose.Schema(
       select: false, // this will not appear when we sent back the response to the client
     },
     startDates: [Date],
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
   },
   {
     toJSON: { virtuals: true },
@@ -90,11 +116,27 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
+// tourSchema.index({ price: 1 }); // prices are stored in ascending order in indexes ; index is a separate collection outside the database additional table ; whenever mongo wants
+// query it searches this table and then returns the docs matching the results of querying on this additional table. ( improves read performance )
+// uniqueness in a field also creates an index by default in mongodb
+// single field index when we want to query a single param and compound index when we want to query multiple params.
+
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // compound index ; indexes are set based on access patterns
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: "2dsphere" });
+//
 // Virtual Properties are fields which we define in our schema but are not persisted in the db. ( for example conversion of months to weeks.)
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 // virtual properties can not be used to query as they are not a part of the database.
+
+// Virtual populate ( the populate is not being persisted to the database. We are establishing it in the frontend.)
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
+});
 
 // Document middleware provided by mongoose runs before .save() and .create() ; It does not run before .insert()
 tourSchema.pre("save", function (next) {
@@ -113,13 +155,21 @@ tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   next();
 });
-
-// Aggregation middlewares on .aggregate()
-
-tourSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v -passwordChangedAt",
+  });
+  // mongoose will need to a new query in order to populate and create the connection.
   next();
 });
+
+// // Aggregation middlewares on .aggregate()
+
+// tourSchema.pre("aggregate", function (next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 
 const Tour = mongoose.model("Tour", tourSchema);
 

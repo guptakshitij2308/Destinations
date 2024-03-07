@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -17,6 +18,11 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, "Please enter a valid email address."],
   },
   photo: String,
+  role: {
+    type: String,
+    enum: ["user", "admin", "lead-guide", "guide"],
+    default: "user",
+  },
   password: {
     type: String,
     required: [true, "Please enter your password."],
@@ -34,6 +40,14 @@ const userSchema = new mongoose.Schema({
       message: "Password and confirm password do not match.",
     },
   },
+  passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 // JWT is stateless solution for authentication of user ( users do not have any state on the server. )
@@ -46,12 +60,48 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword,
 ) {
   const result = await bcrypt.compare(candidatePassword, userPassword);
   return result;
+};
+
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+
+  // Saving to the db is a bit slower than issuing jwt ; hence we subtract 1s from here
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    return JWTTimestamp < changedTimestamp;
+  }
+  return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  return token;
 };
 
 const User = mongoose.model("User", userSchema);
