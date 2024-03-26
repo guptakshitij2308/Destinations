@@ -14,6 +14,7 @@ exports.updateData = async (data, type) => {
       data,
     });
     if (res.data.status === "success") {
+      location.reload(true);
       showAlert("success", "Updated successfully.");
     }
   } catch (err) {

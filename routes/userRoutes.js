@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const express = require("express");
 
 const router = express.Router();
@@ -27,7 +28,13 @@ router.get(
   userController.getUser,
 );
 
-router.patch("/updateMe", userController.updateMe);
+// Multer : Middleware to handle multi part form data
+router.patch(
+  "/updateMe",
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe,
+);
 router.delete("/deleteMe", userController.deleteMe);
 
 router.use(authController.restrictTo("admin"));

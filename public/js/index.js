@@ -22,9 +22,20 @@ if (updateBtn) {
   updateBtn.addEventListener("submit", (e) => {
     // console.log("Submitted.");
     e.preventDefault();
-    const email = document.getElementById("email").value;
-    const name = document.getElementById("name").value;
-    updateData({ name, email }, "data");
+
+    const form = new FormData();
+
+    // const email = document.getElementById("email").value;
+    // const name = document.getElementById("name").value;
+    // updateData({ name, email }, "data");
+
+    // Here we are basically recreating the multipart form data ; hence the name multer
+    form.append("name", document.getElementById("name").value);
+    form.append("email", document.getElementById("email").value);
+    form.append("photo", document.getElementById("photo").files[0]);
+
+    updateData(form, "data");
+
     // console.log("Updated bro!!");
   });
 }

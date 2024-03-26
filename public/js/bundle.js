@@ -12092,6 +12092,7 @@ exports.updateData = /*#__PURE__*/function () {
         case 3:
           res = _context.sent;
           if (res.data.status === "success") {
+            location.reload(true);
             (0, _alerts.showAlert)("success", "Updated successfully.");
           }
           _context.next = 11;
@@ -12267,12 +12268,18 @@ if (updateBtn) {
   updateBtn.addEventListener("submit", function (e) {
     // console.log("Submitted.");
     e.preventDefault();
-    var email = document.getElementById("email").value;
-    var name = document.getElementById("name").value;
-    (0, _updateSettings.updateData)({
-      name: name,
-      email: email
-    }, "data");
+    var form = new FormData();
+
+    // const email = document.getElementById("email").value;
+    // const name = document.getElementById("name").value;
+    // updateData({ name, email }, "data");
+
+    // Here we are basically recreating the multipart form data ; hence the name multer
+    form.append("name", document.getElementById("name").value);
+    form.append("email", document.getElementById("email").value);
+    form.append("photo", document.getElementById("photo").files[0]);
+    (0, _updateSettings.updateData)(form, "data");
+
     // console.log("Updated bro!!");
   });
 }
@@ -12341,7 +12348,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52216" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56200" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
