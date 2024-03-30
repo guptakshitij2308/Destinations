@@ -2,11 +2,13 @@
 import "@babel/polyfill";
 import { login, logout } from "./login";
 import { updateData } from "./updateSettings";
+import { bookTour } from "./stripe.js";
 
 const loginForm = document.querySelector(".form--login");
 const logoutBtn = document.querySelector(".nav__el--logout");
 const updateBtn = document.querySelector(".form-user-data");
 const updatePasswordBtn = document.querySelector(".form-user-password");
+const bookBtn = document.getElementById("book-tour");
 
 if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
@@ -67,4 +69,12 @@ if (updatePasswordBtn) {
 
 if (logoutBtn) {
   logoutBtn.addEventListener("click", logout);
+}
+
+if (bookBtn) {
+  bookBtn.addEventListener("click", (e) => {
+    e.target.textContent = "Processing...";
+    const { tourId } = e.target.dataset;
+    bookTour(tourId);
+  });
 }
