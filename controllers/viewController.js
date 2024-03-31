@@ -1,4 +1,6 @@
 const Tour = require("../models/tourModel");
+const User = require("../models/userModel");
+const Booking = require("../models/bookingModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
@@ -38,5 +40,59 @@ exports.loginForm = catchAsync(async (req, res, next) => {
 exports.signupForm = catchAsync(async (req, res, next) => {
   res.status(200).render("signup", {
     title: "Please signup to continue",
+  });
+});
+
+exports.getAccount = catchAsync(async (req, res) => {
+  res.status(200).render("account", {
+    title: "Your account",
+  });
+});
+
+exports.getMyTours = catchAsync(async (req, res, next) => {
+  // Find all bookings
+
+  const bookings = await Booking.find({ user: req.user.id });
+
+  // Find tours with the returned IDs
+
+  const tourIDs = bookings.map((el) => el.tour);
+  const tours = await Tour.find({ _id: { $in: tourIDs } });
+
+  res.status(200).render("overview", {
+    title: "My tours",
+    tours,
+  });
+});
+
+// Solution 1
+// exports.updateUserData = catchAsync(async (req, res, next) => {
+//   const updatedUser = await User.findByIdAndUpdate(
+//     req.user.id,
+//     { name: req.body.name, email: req.body.email },
+//     {
+//       new: true,
+//       runValidators: true,
+//     },
+//   );
+//   res.status(200).render("account", {
+//     title: "Your account",
+//     user: updatedUser,
+//   });
+// });
+
+// With api
+exports.updateUserData = catchAsync(async (req, res, next) => {
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    { name: req.body.name, email: req.body.email },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+  res.status(200).render("account", {
+    title: "Your account",
+    user: updatedUser,
   });
 });
