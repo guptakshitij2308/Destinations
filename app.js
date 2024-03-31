@@ -9,6 +9,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
 const cookieParser = require("cookie-parser"); // this will parse all the cookies from the incoming request
+const compression = require("compression");
 
 const AppError = require("./utils/appError");
 const tourRouter = require("./routes/tourRoutes");
@@ -83,6 +84,8 @@ app.use(
     ],
   }),
 );
+
+app.use(compression());
 
 // Routes
 
