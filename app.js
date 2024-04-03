@@ -21,6 +21,8 @@ const bookingRouter = require("./routes/bookingRoutes");
 
 const app = express();
 
+// app.enable("trust proxy");
+
 app.set("view engine", "pug"); // we have to tell express at the start after intializing our app about the template engine which will be used ; pug templates called views in express
 
 app.set("views", path.join(__dirname, "views")); // we are using path.join as we don't know if there would be / when we use __dirname  or not.
@@ -53,7 +55,7 @@ app.use("/api", limiter);
 
 // app.use(cors(corsOptions));
 
-app.use(cors());
+app.use(cors()); // Acess Control Allow Origin * (cross origin resource sharing)
 app.options("*", cors());
 
 // Body parser,reading data from body into req.body
