@@ -18,10 +18,11 @@ const reviewRouter = require("./routes/reviewRoutes");
 const viewRouter = require("./routes/viewRoutes");
 const globalErrorHandler = require("./controllers/errorController");
 const bookingRouter = require("./routes/bookingRoutes");
+const { webhookCheckout } = require("./controllers/bookingController.js");
 
 const app = express();
 
-// app.enable("trust proxy");
+app.enable("trust proxy");
 
 app.set("view engine", "pug"); // we have to tell express at the start after intializing our app about the template engine which will be used ; pug templates called views in express
 
@@ -47,6 +48,12 @@ const limiter = rateLimit({
 });
 
 app.use("/api", limiter);
+
+app.post(
+  "/webhookCheckout",
+  express.raw({ type: "application/json" }),
+  webhookCheckout,
+); // body received needs to be in raw form for stripe function and not in json
 
 // const corsOptions = {
 //   origin: "http://localhost:3000",
