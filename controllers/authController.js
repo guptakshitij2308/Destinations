@@ -23,7 +23,7 @@ const createSendToken = (user, statusCode, req, res) => {
     ),
     // secure: true, // only works in https
     httpOnly: true, // cookie can not be modified in any way by the browser
-    secure: req.secure || req.headers("x-forwarded-proto") === "https",
+    secure: req.secure,
   };
 
   res.cookie("jwt", token, cookieOptions);
