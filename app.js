@@ -10,6 +10,7 @@ const xss = require("xss-clean");
 const hpp = require("hpp");
 const cookieParser = require("cookie-parser"); // this will parse all the cookies from the incoming request
 const compression = require("compression");
+const bodyParser = require("body-parser");
 
 const AppError = require("./utils/appError");
 const tourRouter = require("./routes/tourRoutes");
@@ -51,7 +52,7 @@ app.use("/api", limiter);
 
 app.post(
   "/webhook-checkout",
-  express.raw({ type: "application/json" }),
+  bodyParser.raw({ type: "application/json" }),
   webhookCheckout,
 ); // body received needs to be in raw form for stripe function and not in json
 
