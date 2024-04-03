@@ -50,7 +50,7 @@ const limiter = rateLimit({
 app.use("/api", limiter);
 
 app.post(
-  "/webhookCheckout",
+  "/webhook-checkout",
   express.raw({ type: "application/json" }),
   webhookCheckout,
 ); // body received needs to be in raw form for stripe function and not in json
